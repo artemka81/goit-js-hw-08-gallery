@@ -63,3 +63,79 @@ const galleryItems = [
     description: 'Lighthouse Coast Sea',
   },
 ];
+const refs = {
+  container: document.querySelector('.js-gallery'),
+  modal: document.querySelector('.js-lightbox'),
+  btnClose: document.querySelector('button[data-action="close-lightbox"]'),
+  original: document.querySelector('.lightbox__image'),
+};
+
+function createItemGallery(galleryArr) {
+  return galleryArr
+    .map(({ preview, original, description }) => {
+      return `
+    <li class="gallery__item">
+      <a
+        class="gallery__link"
+        href="${original}"
+      >
+      <img
+        class="gallery__image"
+        src="${preview}"
+        data-source="${original}"
+        alt="${description}"
+      />
+      </a>
+    </li>
+    `;
+    })
+    .join('');
+}
+
+const collectionItems = createItemGallery(galleryItems);
+refs.container.insertAdjacentHTML('beforeend', collectionItems);
+
+refs.container.addEventListener('click', showModal);
+refs.modal.addEventListener('click', closeModal);
+window.addEventListener('keydown', closeModal);
+
+function showModal(event) {
+  event.preventDefault();
+  const isImg = event.target.classList.contains('gallery__image');
+  if (!isImg) {
+    return;
+  }
+  showOriginalImg();
+  open();
+}
+
+function closeModal(event) {
+  if (
+    (event.type === 'click' && event.target === refs.btnClose) ||
+    event.target.classList.contains('lightbox__overlay') ||
+    (event.type === 'keydown' && event.keyCode === 27)
+  ) {
+    switch (event.type) {
+      case 'click':
+        close();
+        break;
+      case 'keydown':
+        close();
+        break;
+    }
+  }
+}
+
+function close() {
+  refs.modal.classList.remove('is-open');
+}
+function open() {
+  refs.modal.classList.add('is-open');
+}
+
+function showOriginalImg() {
+  const imgPreview = event.target;
+  refs.original.removeAttribute('src');
+  refs.original.setAttribute('src', imgPreview.dataset.source);
+  refs.original.alt = imgPreview.alt;
+}
